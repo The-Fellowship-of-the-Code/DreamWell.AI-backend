@@ -47,3 +47,31 @@ async function getStory(request, response, next){
     next(error);
   }
 }
+
+app.post('/stories', addStory);
+
+async function addStory(request, response, next) {
+  console.log(request.body)
+  try {
+    let createdStory = await Story.create(request.body);
+
+    response.status(200).send(createdStory);
+  } catch (error) {
+    next(error);
+  }
+}
+
+app.delete('/stories/:storyID', deleteStory);
+
+async function deleteStory (request, response, next) {
+  console.log(request.params);
+  try {
+    let id = request.params.storyID;
+
+    await Story.findByIdAndDelete(id);
+
+    response.status(200).send('Story was delete from DB');
+  } catch (error) {
+    next(error)
+  }
+}
