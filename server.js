@@ -53,7 +53,7 @@ async function generateStory(request, response, next) {
 
     const aiResponse = await openai.createCompletion({
       model: 'text-davinci-003',
-      prompt: `Tell me a bedtime story about ${request.body.prompt} that is suitable for a ${request.body.age} year old individual that takes place in ${request.body.setting}.`,
+      prompt: `Tell me a bedtime story for a ${request.body.age} year old individual with the following parameters: topic: ${request.body.topic}, protagonist: ${request.body.mainChar} setting: ${request.body.setting}, conflict: ${request.body.conflict}.`,
       max_tokens: 200,
       temperature: 0.8,
     });
@@ -64,7 +64,7 @@ async function generateStory(request, response, next) {
       title: request.body.title,
       content: aiStory,
       date: Date.now(),
-      entry: 'Wow!'
+      entry: ''
     }
     console.log(storyObject);
 
