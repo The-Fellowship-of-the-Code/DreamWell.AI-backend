@@ -6,6 +6,14 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 
+const { Configuration, OpenAIApi } = require('openai');
+
+const configuration = new Configuration({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+const openai = new OpenAIApi(configuration);
+
 const Story = require('./model/Story.js');
 
 // require in the mongoose library
@@ -19,6 +27,7 @@ app.use(express.json());
 
 // DEFINE PORT VALIDATE .ENV IS WORKING
 const PORT = process.env.PORT || 3002;
+
 
 app.get('/test', (request, response) => {
   response.send('test request received')
@@ -36,8 +45,47 @@ db.once('open', function () {
 });
 
 app.get('/stories', getStory);
+app.post('/stories', generateStory);
+app.delete('/stories/:storyID', deleteStory);
 
-async function getStory(request, response, next){
+async function generateStory(request, response, next) {
+  try {
+
+    const aiResponse = await openai.createCompletion({
+      model: 'text-davinci-003',
+      prompt: `Tell me a bedtime story about ${request.body.prompt} that is suitable for a ${request.body.age} year old individual that takes place in ${request.body.setting}.`,
+      max_tokens: 200,
+      temperature: 0.8,
+    });
+
+    let aiStory = aiResponse.data.choices[0].text
+
+    let storyObject = {
+      title: request.body.title,
+      content: aiStory,
+      date: Date.now(),
+      entry: 'Wow!'
+    }
+    console.log(storyObject);
+
+    await Story.create(storyObject)
+
+    response.status(200).send(aiStory);
+  } catch (error) {
+    next(error);
+  }
+}
+
+app.post('*', (request, response) => {
+  response.status(404).send('Not available');
+});
+
+app.use((error, request, response, next) => {
+  console.log(error.message);
+  response.status(500).send(error.message);
+});
+
+async function getStory(request, response, next) {
   try {
 
     let allStories = await Story.find({});
@@ -48,22 +96,7 @@ async function getStory(request, response, next){
   }
 }
 
-app.post('/stories', addStory);
-
-async function addStory(request, response, next) {
-  console.log(request.body)
-  try {
-    let createdStory = await Story.create(request.body);
-
-    response.status(200).send(createdStory);
-  } catch (error) {
-    next(error);
-  }
-}
-
-app.delete('/stories/:storyID', deleteStory);
-
-async function deleteStory (request, response, next) {
+async function deleteStory(request, response, next) {
   console.log(request.params);
   try {
     let id = request.params.storyID;
