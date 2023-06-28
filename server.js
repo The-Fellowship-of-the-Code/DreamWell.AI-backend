@@ -54,8 +54,9 @@ async function generateStory(request, response, next) {
 
     const aiResponse = await openai.createCompletion({
       model: 'text-davinci-003',
-      prompt: `Tell me a bedtime story for a ${request.body.age} year old individual with the following parameters: topic: ${request.body.topic}, protagonist: ${request.body.mainChar} setting: ${request.body.setting}, conflict: ${request.body.conflict}.`,
-      max_tokens: 200,
+      prompt:
+        `You are an ancient storyteller with a wide knowledge of various topics. You enjoy telling captivating stories with a twist. Complete a bedtime story in 185 words or less, appropriate for a ${request.body.age} year old. The main character will be ${request.body.mainChar}, living in ${request.body.setting} and must face ${request.body.problem}.`,
+      max_tokens: 300,
       temperature: 0.8,
     });
 
