@@ -65,7 +65,7 @@ async function generateStory(request, response, next) {
     let storyObject = {
       title: request.body.title,
       content: aiStory,
-      date: Date.now(),
+      date: Date(Date.now()),
       entry: ''
     }
     console.log(storyObject);
