@@ -47,6 +47,7 @@ db.once('open', function () {
 app.get('/stories', getStory);
 app.post('/stories', generateStory);
 app.delete('/stories/:storyID', deleteStory);
+app.put('/stories/:storyID', updateStory)
 
 async function generateStory(request, response, next) {
   try {
@@ -87,7 +88,6 @@ app.use((error, request, response, next) => {
 
 async function getStory(request, response, next) {
   try {
-
     let allStories = await Story.find({});
 
     response.status(200).send(allStories);
@@ -100,7 +100,6 @@ async function deleteStory(request, response, next) {
   console.log(request.params);
   try {
     let id = request.params.storyID;
-
     await Story.findByIdAndDelete(id);
 
     response.status(200).send('Story was delete from DB');
@@ -108,3 +107,17 @@ async function deleteStory(request, response, next) {
     next(error)
   }
 }
+
+async function updateStory(request, response, next) {
+  console.log(request.params)
+  try {
+    let id = request.params.storyID;
+    let data = request.body;
+    let updatedStory = await Story.findByIdAndUpdate(id, data, {new:true, overwrite:true});
+
+    response.status(200).send(updatedStory);
+  } catch (error) {
+    next(error);
+  }
+}
+
